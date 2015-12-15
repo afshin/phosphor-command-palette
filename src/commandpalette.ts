@@ -82,7 +82,6 @@ class CommandPalette extends Panel {
   }
 
   private _renderSection(section: ICommandSection): void {
-    console.log('here', section.header);
     this._renderHeader(section.header);
     section.specs.forEach(spec => { this._renderCommandSpec(spec); });
   }
