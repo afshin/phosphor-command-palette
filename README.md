@@ -1,9 +1,5 @@
-phosphor-dashboard
-==================
-
-A demonstration of a drag-and-drop widget using [PhosphorJS](http://phosphorjs.github.io).
-
-Live demonstration: [http://afshin.github.io/phosphor-dashboard](http://afshin.github.io/phosphor-dashboard)
+phosphor-command-palette
+========================
 
 Source Build
 ------------
@@ -11,12 +7,10 @@ Source Build
 **Prerequisites**
 - [git](http://git-scm.com/)
 - [node 0.12+](http://nodejs.org/)
-- [python](https://www.python.org)
-- [Bokeh](http://bokeh.pydata.org/en/latest/)
 
 ```bash
-git clone https://github.com/afshin/phosphor-dashboard.git
-cd phosphor-dashboard
+git clone https://github.com/afshin/phosphor-command-palette.git
+cd phosphor-command-palette
 npm install
 npm run build
 ```
