@@ -1,0 +1,29 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2015, PhosphorJS Contributors
+|
+| Distributed under the terms of the BSD 3-Clause License.
+|
+| The full license is in the file LICENSE, distributed with this software.
+|----------------------------------------------------------------------------*/
+.p-Command-Palette {
+  background: #f5f5f5;
+  min-width: 150px;
+  max-width: 250px;
+  min-height: 50px;
+}
+
+.p-Command-Palette .p-header {
+  padding: 10px;
+  text-align: center;
+}
+
+.p-Command-Palette .p-header hr {
+  margin: 0;
+  padding: 0;
+  color: #e0e0e0;
+  background-color: #e0e0e0;
+}
+
+.p-Command-Palette .p-command hr {
+  color: red;
+}
