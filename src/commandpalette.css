@@ -14,29 +14,48 @@
 }
 
 .p-Command-Palette .p-header {
-  padding: 10px;
-  text-align: center;
+  color: #757575;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px;
 }
 
 .p-Command-Palette .p-header hr {
-  margin: 0;
+  border-width: 0;
+  margin: 3px -3px;
   padding: 0;
   color: #e0e0e0;
   background-color: #e0e0e0;
-}
-
-.p-Command-Palette .p-command hr {
-  color: red;
+  height: 1px;
+  width: 100%;
 }
 
 .p-Command-Palette .p-search {
     width: 100%;
 }
 
-.p-Command-Palette .p-search input {
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    margin: 0;
+.p-Command-Palette .p-command {
+    font-weight: 500;
+    margin: 0 -3px;
     padding: 3px;
-    width: calc(100% - 8px);
+}
+
+.p-Command-Palette .p-command .p-description {
+    color: #9e9e9e;
+    font-weight: 400;
+    font-size: 10px;
+}
+
+.p-Command-Palette .p-command .p-shortcut {
+    color: #9e9e9e;
+    font-weight: 400;
+    font-size: 10px;
+    float: right;
+}
+
+.p-Command-Palette .p-command:hover,
+.p-Command-Palette .p-command:hover .p-description,
+.p-Command-Palette .p-command:hover .p-shortcut {
+  background: #2196f3;
+  color: #fff;
 }

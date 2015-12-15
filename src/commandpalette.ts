@@ -28,6 +28,10 @@ const HEADER_CLASS = 'p-header';
 
 const COMMAND_CLASS = 'p-command';
 
+const DESCRIPTION_CLASS = 'p-description';
+
+const SHORTCUT_CLASS = 'p-shortcut';
+
 const SEARCH_CLASS = 'p-search';
 
 export
@@ -72,8 +76,16 @@ class CommandPalette extends Panel {
 
   private _renderCommandSpec(spec: ICommandSpec): void {
     let command = document.createElement('div');
+    let description = document.createElement('div');
+    let shortcut = document.createElement('div');
     command.classList.add(COMMAND_CLASS);
-    command.appendChild(document.createTextNode(spec.command.caption));
+    description.classList.add(DESCRIPTION_CLASS);
+    shortcut.classList.add(SHORTCUT_CLASS);
+    command.textContent = spec.command.caption;
+    description.textContent = spec.originalText;
+    shortcut.textContent = '⌘⌘';
+    command.appendChild(shortcut);
+    command.appendChild(description);
     this.node.appendChild(command);
   }
 

@@ -73,46 +73,6 @@ body {
 }
 
 
-.D-Dock .d-content {
-  overflow: auto;
-}
-
-
-.D-Dock .d-content.table {
-  min-width: 150px;
-  min-height: 150px;
-}
-
-
-.D-Dock .d-content.line-chart {
-  overflow: hidden;
-  min-width: 150px;
-  min-height: 150px;
-}
-
-
-.D-Dock .d-content.pencil {
-  padding: 0;
-  min-width: 250px;
-  min-height: 150px;
-}
-
-
-.D-Dashboard .d-content.television {
-  margin: 0;
-  padding: 0;
-  min-width: 320px;
-  min-height: 240px;
-}
-
-
-.D-Dock .d-content video {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-
 .p-DockTabPanel {
   padding-right: 2px;
   padding-bottom: 2px;
