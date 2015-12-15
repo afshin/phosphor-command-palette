@@ -28,6 +28,8 @@ const HEADER_CLASS = 'p-header';
 
 const COMMAND_CLASS = 'p-command';
 
+const SEARCH_CLASS = 'p-search';
+
 export
 interface ICommandSpec {
   score?: number;
@@ -50,19 +52,21 @@ class CommandPalette extends Panel {
 
   set commands(commands: ICommandSection[]) {
     this._commands = commands;
-    this._emptyPalette();
+    this._emptyList();
     this._commands.forEach(section => { this._renderSection(section); });
   }
 
   constructor() {
     super();
     this.addClass(PALETTE_CLASS);
+    this._renderSearch();
+    this._renderList();
   }
 
-  private _emptyPalette(): void {
-    let { node } = this;
-    while (node.firstChild) {
-      node.removeChild(node.firstChild);
+  private _emptyList(): void {
+    let list = this._list;
+    while (list.firstChild) {
+      list.removeChild(list.firstChild);
     }
   }
 
@@ -81,10 +85,25 @@ class CommandPalette extends Panel {
     this.node.appendChild(header);
   }
 
+  private _renderList(): void {
+    this._list = document.createElement('div');
+    this.node.appendChild(this._list);
+  }
+
+  private _renderSearch(): void {
+    let input = document.createElement('input');
+    this._search = document.createElement('div');
+    this._search.classList.add(SEARCH_CLASS);
+    this._search.appendChild(input);
+    this.node.appendChild(this._search);
+  }
+
   private _renderSection(section: ICommandSection): void {
     this._renderHeader(section.header);
     section.specs.forEach(spec => { this._renderCommandSpec(spec); });
   }
 
   private _commands: ICommandSection[] = null;
+  private _list: HTMLDivElement = null;
+  private _search: HTMLDivElement = null;
 }

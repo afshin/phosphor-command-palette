@@ -10,6 +10,7 @@
   min-width: 150px;
   max-width: 250px;
   min-height: 50px;
+  padding: 5px 3px;
 }
 
 .p-Command-Palette .p-header {
@@ -26,4 +27,16 @@
 
 .p-Command-Palette .p-command hr {
   color: red;
+}
+
+.p-Command-Palette .p-search {
+    width: 100%;
+}
+
+.p-Command-Palette .p-search input {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin: 0;
+    padding: 3px;
+    width: calc(100% - 8px);
 }
