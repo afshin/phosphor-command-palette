@@ -38,6 +38,27 @@ const INSTRUCTIONS = 'Check out the command palette';
 
 const commands: ICommandSection[] = [
   {
+    header: 'Near eastern civilizations',
+    specs: [
+      {
+        originalText: 'The city-state of Sumer',
+        command: { id: 'sumer', caption: 'Show Sumer' }
+      },
+      {
+        originalText: 'The Babylonian empire',
+        command: { id: 'babylon', caption: 'Show Babylon' }
+      },
+      {
+        originalText: 'The Old Kingdom of Egypt',
+        command: { id: 'oldkingdom', caption: 'Show Old Kingdom' }
+      },
+      {
+        originalText: 'The city-state of Tyre',
+        command: { id: 'tyre', caption: 'Show Tyre' }
+      }
+    ]
+  },
+  {
     header: 'Foo, bar, and friends',
     specs: [
       {
