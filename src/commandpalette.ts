@@ -8,10 +8,6 @@
 'use-strict';
 
 import {
-Message
-} from 'phosphor-messaging';
-
-import {
 Panel
 } from 'phosphor-widget';
 
@@ -45,7 +41,10 @@ interface ICommandSpec {
 }
 
 export
-interface ICommandSection { header: string, specs: ICommandSpec[] };
+interface ICommandSection {
+  header: string;
+  specs: ICommandSpec[];
+};
 
 export
 class CommandPalette extends Panel {
