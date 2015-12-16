@@ -12,6 +12,10 @@ import {
 } from 'phosphor-messaging';
 
 import {
+  ISignal, Signal
+} from 'phosphor-signaling';
+
+import {
 Panel
 } from 'phosphor-widget';
 
@@ -54,6 +58,12 @@ interface ICommandSection {
 
 export
 class CommandPalette extends Panel {
+
+  static executeSignal = new Signal<CommandPalette, string>();
+
+  get execute(): ISignal<CommandPalette, string> {
+    return CommandPalette.executeSignal.bind(this);
+  }
 
   get commands(): ICommandSection[] {
     return this._commands;
@@ -106,7 +116,7 @@ class CommandPalette extends Panel {
       }
       target = target.parentElement;
     }
-    console.log('click', target.getAttribute(COMMAND_ID));
+    this.execute.emit(target.getAttribute(COMMAND_ID));
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {

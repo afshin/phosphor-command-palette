@@ -115,6 +115,9 @@ function createHeader(): Widget {
 function createPalette(): Panel {
   let palette = new CommandPalette();
   palette.commands = commands;
+  palette.execute.connect((sender, args) => {
+    console.log('execute signal for command: ', args);
+  });
   return palette;
 }
 
