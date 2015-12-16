@@ -38,11 +38,23 @@ const INSTRUCTIONS = 'Check out the command palette';
 
 const commands: ICommandSection[] = [
   {
-    header: 'Foo',
+    header: 'Foo, bar, and friends',
     specs: [
       {
         originalText: 'Foo original text',
         command: { id: 'foo', caption: 'Run Foo!' }
+      },
+      {
+        originalText: 'Bar original text',
+        command: { id: 'bar', caption: 'Run Bar!' }
+      },
+      {
+        originalText: 'Baz original text',
+        command: { id: 'baz', caption: 'Run Baz!' }
+      },
+      {
+        originalText: 'Qux original text',
+        command: { id: 'qux', caption: 'Run Qux!' }
       }
     ]
   }
