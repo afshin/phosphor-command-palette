@@ -55,6 +55,18 @@ const commands: ICommandSection[] = [
       {
         originalText: 'The city-state of Tyre',
         command: { id: 'tyre', caption: 'Show Tyre' }
+      },
+      {
+        originalText: 'The Hittite empire',
+        command: { id: 'hittite', caption: 'Show Hittite empire' }
+      },
+      {
+        originalText: 'The Hellenistic kingdom of Parthia',
+        command: { id: 'parthia', caption: 'Show Parthia' }
+      },
+      {
+        originalText: 'The Neo-Babylonian empire',
+        command: { id: 'neobabylonian', caption: 'Show Neo-Babylonian empire' }
       }
     ]
   },

@@ -11,6 +11,7 @@
   max-width: 250px;
   min-height: 50px;
   padding: 5px 3px;
+  overflow: auto;
 }
 
 .p-Command-Palette .p-header {
