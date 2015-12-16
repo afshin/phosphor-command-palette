@@ -30,8 +30,11 @@
   width: 100%;
 }
 
-.p-Command-Palette .p-search {
-    width: 100%;
+.p-Command-Palette .p-search input {
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  padding: 4px 0;
+  width: calc(100% - 8px);
 }
 
 .p-Command-Palette .p-command {
