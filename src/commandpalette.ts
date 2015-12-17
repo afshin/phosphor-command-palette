@@ -140,17 +140,20 @@ class CommandPalette extends Panel {
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {
-    let { keyCode } = event;
+    let { altKey, ctrlKey, metaKey, keyCode } = event;
     let input = (this._search.querySelector('input') as HTMLInputElement);
-    let oldValue = input.value;
     if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW) {
+      let oldValue = input.value;
       requestAnimationFrame(() => {
         let newValue = input.value;
-        if (newValue === oldValue) {
-          return;
+        if (newValue !== oldValue) {
+          this.search.emit({ query: newValue, id: ++searchID });
         }
-        this.search.emit({ query: newValue, id: ++searchID });
       });
+      return;
+    }
+    // Ignore keyboard shortcuts that include up and down arrow.
+    if (altKey || ctrlKey || metaKey) {
       return;
     }
     event.preventDefault();
