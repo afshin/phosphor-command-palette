@@ -40,6 +40,10 @@ const SHORTCUT_CLASS = 'p-shortcut';
 
 const SEARCH_CLASS = 'p-search';
 
+const UP_ARROW = 38;
+
+const DOWN_ARROW = 40;
+
 export
 interface ICommandSpec {
   score?: number;
@@ -47,6 +51,7 @@ interface ICommandSpec {
   command: {
     id: string;
     caption: string;
+    shortcut?: string;
   }
 }
 
@@ -57,12 +62,22 @@ interface ICommandSection {
 };
 
 export
+interface ICommandSearch {
+  id: number;
+  query: string;
+}
+
+var searchID = 0;
+
+const executeSignal = new Signal<CommandPalette, string>();
+
+const searchSignal = new Signal<CommandPalette, ICommandSearch>();
+
+export
 class CommandPalette extends Panel {
 
-  static executeSignal = new Signal<CommandPalette, string>();
-
   get execute(): ISignal<CommandPalette, string> {
-    return CommandPalette.executeSignal.bind(this);
+    return executeSignal.bind(this);
   }
 
   get commands(): ICommandSection[] {
@@ -73,6 +88,10 @@ class CommandPalette extends Panel {
     this._commands = commands;
     this._emptyList();
     this._commands.forEach(section => { this._renderSection(section); });
+  }
+
+  get search(): ISignal<CommandPalette, ICommandSearch> {
+    return searchSignal.bind(this);
   }
 
   constructor() {
@@ -104,7 +123,8 @@ class CommandPalette extends Panel {
   }
 
   private _evtClick(event: MouseEvent): void {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey) {
+    let { altKey, ctrlKey, metaKey, shiftKey } = event;
+    if (event.button !== 0 || altKey || ctrlKey || metaKey || shiftKey) {
       return;
     }
     event.stopPropagation();
@@ -120,7 +140,29 @@ class CommandPalette extends Panel {
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {
-    console.log('keydown');
+    let { keyCode } = event;
+    let input = (this._search.querySelector('input') as HTMLInputElement);
+    let oldValue = input.value;
+    if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW) {
+      requestAnimationFrame(() => {
+        let newValue = input.value;
+        if (newValue === oldValue) {
+          return;
+        }
+        this.search.emit({ query: newValue, id: ++searchID });
+      });
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (keyCode === UP_ARROW) {
+      console.log('go up');
+      return;
+    }
+    if (keyCode === DOWN_ARROW) {
+      console.log('go down');
+      return;
+    }
   }
 
   private _emptyList(): void {
@@ -139,7 +181,9 @@ class CommandPalette extends Panel {
     shortcut.classList.add(SHORTCUT_CLASS);
     command.textContent = spec.command.caption;
     description.textContent = spec.originalText;
-    shortcut.textContent = '⌘⌘';
+    if (spec.command.shortcut) {
+      shortcut.textContent = spec.command.shortcut;
+    }
     command.appendChild(shortcut);
     command.appendChild(description);
     command.setAttribute(COMMAND_ID, spec.command.id);

@@ -42,31 +42,31 @@ const commands: ICommandSection[] = [
     specs: [
       {
         originalText: 'The city-state of Sumer',
-        command: { id: 'sumer', caption: 'Show Sumer' }
+        command: { id: 'sumer', caption: 'Show Sumer', shortcut: '⌘⎋' }
       },
       {
         originalText: 'The Babylonian empire',
-        command: { id: 'babylon', caption: 'Show Babylon' }
+        command: { id: 'babylon', caption: 'Show Babylon', shortcut: '⌘⎋' }
       },
       {
         originalText: 'The Old Kingdom of Egypt',
-        command: { id: 'oldkingdom', caption: 'Show Old Kingdom' }
+        command: { id: 'oldking', caption: 'Show Old Kingdom', shortcut: '⌘⎋' }
       },
       {
         originalText: 'The city-state of Tyre',
-        command: { id: 'tyre', caption: 'Show Tyre' }
+        command: { id: 'tyre', caption: 'Show Tyre', shortcut: '⌘⎋' }
       },
       {
         originalText: 'The Hittite empire',
-        command: { id: 'hittite', caption: 'Show Hittite empire' }
+        command: { id: 'hittite', caption: 'Show Hittite empire', shortcut: '⌘⎋' }
       },
       {
         originalText: 'The Hellenistic kingdom of Parthia',
-        command: { id: 'parthia', caption: 'Show Parthia' }
+        command: { id: 'parthia', caption: 'Show Parthia', shortcut: '⌘⎋' }
       },
       {
         originalText: 'The Neo-Babylonian empire',
-        command: { id: 'neobabylonian', caption: 'Show Neo-Babylonian empire' }
+        command: { id: 'neobab', caption: 'Show Neo-Babylonia', shortcut: '⌘⎋' }
       }
     ]
   },
@@ -117,6 +117,9 @@ function createPalette(): Panel {
   palette.commands = commands;
   palette.execute.connect((sender, args) => {
     console.log('execute signal for command: ', args);
+  });
+  palette.search.connect((sender, args) => {
+    console.log('search signal: ', args);
   });
   return palette;
 }
