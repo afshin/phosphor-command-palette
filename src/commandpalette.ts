@@ -201,7 +201,7 @@ class CommandPalette extends Panel {
     command.appendChild(shortcut);
     command.appendChild(description);
     command.setAttribute(COMMAND_ID, item.id);
-    this.node.appendChild(command);
+    this._list.appendChild(command);
   }
 
   private _renderHeading(heading: ICommandSectionHeading): void {
@@ -209,7 +209,7 @@ class CommandPalette extends Panel {
     header.classList.add(HEADER_CLASS);
     header.appendChild(document.createTextNode(heading.title));
     header.appendChild(document.createElement('hr'));
-    this.node.appendChild(header);
+    this._list.appendChild(header);
   }
 
   private _renderList(): void {

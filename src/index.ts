@@ -39,10 +39,18 @@ import {
   CommandRegistry, ICommandItem
 } from './commands/registry';
 
+import {
+  FuzzyMatcher, ICommandMatchResult
+} from './commands/matcher';
+
 import './index.css';
 
 
 const INSTRUCTIONS = 'Check out the command palette';
+
+const registry = CommandRegistry.instance();
+
+const matcher = new FuzzyMatcher('title', 'caption');
 
 const headings: ICommandSectionHeading[] = [
   { prefix: 'demo:nes', title: 'The Ancient Near East' },
@@ -129,11 +137,6 @@ const commandItems: ICommandItem[] = [
   }
 ];
 
-let commandSections: ICommandSection[] = [
-  { heading: headings[0], commands: [] },
-  { heading: headings[1], commands: [] }
-];
-
 function createDock(): DockPanel {
   let dock = new DockPanel();
   dock.addClass('D-Dock');
@@ -154,18 +157,28 @@ function createHeader(): Widget {
 }
 
 function createPalette(): Panel {
-  let registry = CommandRegistry.instance();
   let palette = new CommandPalette();
-  populateCommandSections(commandItems);
-  palette.commandSections = commandSections;
+  palette.commandSections = commandSections(commandItems);
   palette.execute.connect((sender, args) => {
-    updateStatus('execute signal');
     let command = args as ICommand;
+    updateStatus('execute signal');
     command.execute(void 0);
   });
   palette.search.connect((sender, args) => {
     let search = args as ICommandSearchQuery;
-    updateStatus(`search signal, id: ${search.id}, query: ${search.query}`);
+    updateStatus(`searching, id: ${search.id}, query: ${search.query}`);
+    if (search.query === '') {
+      palette.commandSections = commandSections(commandItems);
+      return;
+    }
+    function resolve(results: ICommandMatchResult[]):void {
+      let items = results.map(value => value.command);
+      palette.commandSections = commandSections(items);
+    }
+    function reject(error: any): void {
+      palette.commandSections = [];
+    }
+    matcher.search(search.query, commandItems).then(resolve, reject);
   });
   return palette;
 }
@@ -188,25 +201,27 @@ function createPanel(header: Widget, list: Panel, dock: DockPanel, status: Widge
   return panel;
 }
 
-function populateCommandSections(items: ICommandItem[]): void {
-  let map: { [prefix: string]: number };
-  map = commandSections.reduce((accumulator, value, index) => {
-    // Empty the commands.
-    value.commands.length = 0;
-    // Associate prefix with index.
-    (accumulator as any)[value.heading.prefix] = index;
-    return accumulator;
-  }, Object.create(null));
-  for (let i = 0; i < commandItems.length; ++i) {
-    let item = commandItems[i];
-    let prefix = item.id.split(':').slice(0, 2).join(':');
-    if (prefix in map) {
-      commandSections[map[prefix]].commands.push(item);
+function commandSections(items: ICommandItem[]): ICommandSection[] {
+  let sections: ICommandSection[] = [];
+  for (let i = 0; i < headings.length; ++i) {
+    let heading = headings[i];
+    let section: ICommandSection = { heading: heading, commands: [] };
+    for (let j = 0; j < items.length; ++j) {
+      let item = items[j];
+      let prefix = item.id.split(':').slice(0, 2).join(':');
+      if (prefix === heading.prefix) {
+        section.commands.push(item);
+      }
+    }
+    if (section.commands.length) {
+      sections.push(section);
     }
   }
+  return sections;
 }
 
 function main(): void {
+  registry.add(commandItems);
   let header = createHeader();
   let palette = createPalette();
   let dock = createDock();

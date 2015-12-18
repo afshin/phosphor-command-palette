@@ -107,7 +107,7 @@ class FuzzyMatcher extends CommandMatcher {
    * @param commands - The list of ICommand-conforming objects to
    *    search over.
    *
-   * @returns - A Promise resolving to a list of ICommandSearchResult
+   * @returns - A Promise resolving to a list of ICommandMatchResult
    *    objects.
    *
    * #### Notes
@@ -138,6 +138,10 @@ class FuzzyMatcher extends CommandMatcher {
 
   private _processResults(results: any[]): ICommandMatchResult[] {
     let retval: ICommandMatchResult[] = [];
+    // TODO: This needs review.
+    if (!results) {
+      return retval;
+    }
     for (let i = 0; i < results.length; ++i) {
       let res = results[i];
       let item = {
@@ -151,12 +155,16 @@ class FuzzyMatcher extends CommandMatcher {
   }
 
   private _mergeResults(primary: ICommandMatchResult[], secondary: any[]): ICommandMatchResult[] {
+    // TODO: This needs review.
+    if (!secondary) {
+      return primary;
+    }
     let primaryIds = primary.map((x) => { x.command.id; });
     for (let i = 0; i < secondary.length; ++i) {
       let id = secondary[i].value.id;
       let pid = primaryIds.indexOf(id);
       if (pid > -1) {
-        primary[pid]["score"] += secondary[i].score;
+        primary[pid]['score'] += secondary[i].score;
       } else {
         primary.push(this._processResults([secondary[i]])[0]);
       }
