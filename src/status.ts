@@ -38,8 +38,8 @@ function createStatus(): Widget {
 export
 function updateStatus(text: string, permanent?: boolean): void {
   status.node.textContent = text || IDLE_MESSAGE;
+  clearTimeout(timeout);
   if (permanent) {
-    clearTimeout(timeout);
     return;
   }
   timeout = setTimeout(() => status.node.textContent = IDLE_MESSAGE, DURATION);

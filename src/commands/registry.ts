@@ -86,6 +86,16 @@ interface ICommandItem {
    * The command to add to the registry.
    */
   command: ICommand;
+
+  /**
+   * The shortcut for the command.
+   */
+  shortcut?: string;
+
+  /**
+   * The title of the command.
+   */
+  title: string;
 }
 
 

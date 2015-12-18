@@ -8,6 +8,10 @@
 'use-strict';
 
 import {
+  DelegateCommand, ICommand
+} from 'phosphor-command';
+
+import {
 Message
 } from 'phosphor-messaging';
 
@@ -28,69 +32,106 @@ import {
 } from './status';
 
 import {
-  CommandPalette, ICommandSection, ICommandSpec
+  CommandPalette, ICommandSection, ICommandSectionHeading, ICommandSearchQuery
 } from './commandpalette';
+
+import {
+  CommandRegistry, ICommandItem
+} from './commands/registry';
 
 import './index.css';
 
 
 const INSTRUCTIONS = 'Check out the command palette';
 
-const commands: ICommandSection[] = [
+const headings: ICommandSectionHeading[] = [
+  { prefix: 'demo:nes', title: 'The Ancient Near East' },
+  { prefix: 'demo:foobar', title: 'Foo, bar, and friends' }
+];
+
+const commandItems: ICommandItem[] = [
   {
-    header: 'Near eastern civilizations',
-    specs: [
-      {
-        originalText: 'The city-state of Sumer',
-        command: { id: 'sumer', caption: 'Show Sumer', shortcut: '⌘⎋' }
-      },
-      {
-        originalText: 'The Babylonian empire',
-        command: { id: 'babylon', caption: 'Show Babylon', shortcut: '⌘⎋' }
-      },
-      {
-        originalText: 'The Old Kingdom of Egypt',
-        command: { id: 'oldking', caption: 'Show Old Kingdom', shortcut: '⌘⎋' }
-      },
-      {
-        originalText: 'The city-state of Tyre',
-        command: { id: 'tyre', caption: 'Show Tyre', shortcut: '⌘⎋' }
-      },
-      {
-        originalText: 'The Hittite empire',
-        command: { id: 'hittite', caption: 'Show Hittite empire', shortcut: '⌘⎋' }
-      },
-      {
-        originalText: 'The Hellenistic kingdom of Parthia',
-        command: { id: 'parthia', caption: 'Show Parthia', shortcut: '⌘⎋' }
-      },
-      {
-        originalText: 'The Neo-Babylonian empire',
-        command: { id: 'neobab', caption: 'Show Neo-Babylonia', shortcut: '⌘⎋' }
-      }
-    ]
+    id: 'demo:nes:sumer',
+    title: 'Show Sumer',
+    caption: 'The city-state of Sumer',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Sumer'); })
   },
   {
-    header: 'Foo, bar, and friends',
-    specs: [
-      {
-        originalText: 'Foo original text',
-        command: { id: 'foo', caption: 'Run Foo!' }
-      },
-      {
-        originalText: 'Bar original text',
-        command: { id: 'bar', caption: 'Run Bar!' }
-      },
-      {
-        originalText: 'Baz original text',
-        command: { id: 'baz', caption: 'Run Baz!' }
-      },
-      {
-        originalText: 'Qux original text',
-        command: { id: 'qux', caption: 'Run Qux!' }
-      }
-    ]
+    id: 'demo:nes:babylon',
+    title: 'Show Babylon',
+    caption: 'The Babylonian empire',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Babylon'); })
+  },
+  {
+    id: 'demo:nes:oldking',
+    title: 'Show Old Kingdom',
+    caption: 'The Old Kingdom of Egypt',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Old Kingdom'); })
+  },
+  {
+    id: 'demo:nes:tyre',
+    title: 'Show Tyre',
+    caption: 'The city-state of Tyre',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Tyre'); })
+  },
+  {
+    id: 'demo:nes:hittite',
+    title: 'Show Hittite empire',
+    caption: 'The Hittite empire',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Hittites'); })
+  },
+  {
+    id: 'demo:nes:parthia',
+    title: 'Show Parthia',
+    caption: 'The Hellenistic kingdom of Parthia',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Parthia'); })
+  },
+  {
+    id: 'demo:nes:neobab',
+    title: 'Show Neo-Babylonia',
+    caption: 'The Neo-Babylonian empire',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Neo Babylonia'); })
+  },
+  {
+    id: 'demo:foobar:foo',
+    title: 'Foo',
+    caption: 'Foo caption',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Foo'); })
+  },
+  {
+    id: 'demo:foobar:bar',
+    title: 'Bar',
+    caption: 'Bar caption',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Bar'); })
+  },
+  {
+    id: 'demo:foobar:baz',
+    title: 'Baz',
+    caption: 'Baz caption',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Baz'); })
+  },
+  {
+    id: 'demo:foobar:qux',
+    title: 'Qux',
+    caption: 'Qux caption',
+    shortcut: '⌘⎋',
+    command: new DelegateCommand(() => { window.alert('Qux'); })
   }
+];
+
+let commandSections: ICommandSection[] = [
+  { heading: headings[0], commands: [] },
+  { heading: headings[1], commands: [] }
 ];
 
 function createDock(): DockPanel {
@@ -113,13 +154,18 @@ function createHeader(): Widget {
 }
 
 function createPalette(): Panel {
+  let registry = CommandRegistry.instance();
   let palette = new CommandPalette();
-  palette.commands = commands;
+  populateCommandSections(commandItems);
+  palette.commandSections = commandSections;
   palette.execute.connect((sender, args) => {
-    console.log('execute signal for command: ', args);
+    updateStatus('execute signal');
+    let command = args as ICommand;
+    command.execute(void 0);
   });
   palette.search.connect((sender, args) => {
-    console.log('search signal: ', args);
+    let search = args as ICommandSearchQuery;
+    updateStatus(`search signal, id: ${search.id}, query: ${search.query}`);
   });
   return palette;
 }
@@ -140,6 +186,24 @@ function createPanel(header: Widget, list: Panel, dock: DockPanel, status: Widge
 
   panel.id = 'main';
   return panel;
+}
+
+function populateCommandSections(items: ICommandItem[]): void {
+  let map: { [prefix: string]: number };
+  map = commandSections.reduce((accumulator, value, index) => {
+    // Empty the commands.
+    value.commands.length = 0;
+    // Associate prefix with index.
+    (accumulator as any)[value.heading.prefix] = index;
+    return accumulator;
+  }, Object.create(null));
+  for (let i = 0; i < commandItems.length; ++i) {
+    let item = commandItems[i];
+    let prefix = item.id.split(':').slice(0, 2).join(':');
+    if (prefix in map) {
+      commandSections[map[prefix]].commands.push(item);
+    }
+  }
 }
 
 function main(): void {

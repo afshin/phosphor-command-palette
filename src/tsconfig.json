@@ -14,6 +14,7 @@
     "../typings/wordCountFS/wordCountFS.d.ts",
     "index.ts",
     "commandpalette.ts",
-    "status.ts"
+    "status.ts",
+    "./commands/index.ts"
   ]
 }
