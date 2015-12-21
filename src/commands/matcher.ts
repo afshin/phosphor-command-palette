@@ -159,7 +159,7 @@ class FuzzyMatcher extends CommandMatcher {
     if (!secondary) {
       return primary;
     }
-    let primaryIds = primary.map((x) => { x.command.id; });
+    let primaryIds = primary.map((x) => { return x.command.id; });
     for (let i = 0; i < secondary.length; ++i) {
       let id = secondary[i].value.id;
       let pid = primaryIds.indexOf(id);
