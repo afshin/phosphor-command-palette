@@ -166,7 +166,8 @@
 	}
 	function createPalette() {
 	    var palette = new commandpalette_1.CommandPalette();
-	    palette.commandSections = commandSections(commandItems);
+	    palette.headings = headings;
+	    palette.commandItems = commandItems;
 	    palette.execute.connect(function (sender, args) {
 	        var command = args;
 	        status_1.updateStatus('execute signal');
@@ -176,16 +177,15 @@
 	        var search = args;
 	        status_1.updateStatus("searching, id: " + search.id + ", query: " + search.query);
 	        if (search.query === '') {
-	            palette.commandSections = commandSections(commandItems);
+	            palette.commandItems = commandItems;
 	            return;
 	        }
 	        function resolve(results) {
-	            var items = results.map(function (value) { return value.command; });
-	            console.log(items);
-	            palette.commandSections = commandSections(items);
+	            var commandItems = results.map(function (value) { return value.command; });
+	            palette.commandItems = commandItems;
 	        }
 	        function reject(error) {
-	            palette.commandSections = [];
+	            palette.commandItems = [];
 	        }
 	        matcher.search(search.query, commandItems).then(resolve, reject);
 	    });
@@ -204,24 +204,6 @@
 	    panel.direction = phosphor_boxpanel_1.BoxPanel.TopToBottom;
 	    panel.id = 'main';
 	    return panel;
-	}
-	function commandSections(items) {
-	    var sections = [];
-	    for (var i = 0; i < headings.length; ++i) {
-	        var heading = headings[i];
-	        var section = { heading: heading, commands: [] };
-	        for (var j = 0; j < items.length; ++j) {
-	            var item = items[j];
-	            var prefix = item.id.split(':').slice(0, 2).join(':');
-	            if (prefix === heading.prefix) {
-	                section.commands.push(item);
-	            }
-	        }
-	        if (section.commands.length) {
-	            sections.push(section);
-	        }
-	    }
-	    return sections;
 	}
 	function main() {
 	    registry.add(commandItems);
@@ -11449,7 +11431,9 @@
 	    __extends(CommandPalette, _super);
 	    function CommandPalette() {
 	        _super.call(this);
-	        this._commandSections = null;
+	        this._commandItems = [];
+	        this._commandSections = [];
+	        this._headings = [];
 	        this._list = null;
 	        this._search = null;
 	        this.addClass(PALETTE_CLASS);
@@ -11463,15 +11447,44 @@
 	        enumerable: true,
 	        configurable: true
 	    });
-	    Object.defineProperty(CommandPalette.prototype, "commandSections", {
+	    Object.defineProperty(CommandPalette.prototype, "commandItems", {
 	        get: function () {
-	            return this._commandSections;
+	            return this._commandItems;
 	        },
-	        set: function (commandSections) {
+	        set: function (commandItems) {
 	            var _this = this;
-	            this._commandSections = commandSections;
+	            this._commandItems = commandItems;
 	            this._emptyList();
-	            this._commandSections.forEach(function (section) { _this._renderSection(section); });
+	            this._createSections();
+	            if (this._commandSections.length) {
+	                this._commandSections.forEach(function (section) {
+	                    _this._renderSection(section);
+	                });
+	            }
+	            else {
+	                this._commandItems.forEach(function (item) { _this._renderCommandItem(item); });
+	            }
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(CommandPalette.prototype, "headings", {
+	        get: function () {
+	            return this._headings;
+	        },
+	        set: function (headings) {
+	            var _this = this;
+	            this._headings = headings;
+	            this._emptyList();
+	            this._createSections();
+	            if (this._commandSections.length) {
+	                this._commandSections.forEach(function (section) {
+	                    _this._renderSection(section);
+	                });
+	            }
+	            else {
+	                this._commandItems.forEach(function (item) { _this._renderCommandItem(item); });
+	            }
 	        },
 	        enumerable: true,
 	        configurable: true
@@ -11501,7 +11514,24 @@
 	        this.node.removeEventListener('click', this);
 	        this.node.removeEventListener('keydown', this);
 	    };
-	    CommandPalette.prototype._getCommandById = function (id) {
+	    CommandPalette.prototype._createSections = function () {
+	        this._commandSections = [];
+	        for (var i = 0; i < this._headings.length; ++i) {
+	            var heading = this._headings[i];
+	            var section = { heading: heading, commands: [] };
+	            for (var j = 0; j < this._commandItems.length; ++j) {
+	                var item = this._commandItems[j];
+	                var prefix = item.id.split(':').slice(0, 2).join(':');
+	                if (prefix === heading.prefix) {
+	                    section.commands.push(item);
+	                }
+	            }
+	            if (section.commands.length) {
+	                this._commandSections.push(section);
+	            }
+	        }
+	    };
+	    CommandPalette.prototype._findCommandById = function (id) {
 	        for (var i = 0; i < this._commandSections.length; ++i) {
 	            var section = this._commandSections[i];
 	            for (var j = 0; j < section.commands.length; ++j) {
@@ -11526,7 +11556,7 @@
 	            }
 	            target = target.parentElement;
 	        }
-	        this.execute.emit(this._getCommandById(target.getAttribute(COMMAND_ID)));
+	        this.execute.emit(this._findCommandById(target.getAttribute(COMMAND_ID)));
 	    };
 	    CommandPalette.prototype._evtKeyDown = function (event) {
 	        var _this = this;
@@ -11889,7 +11919,7 @@
 	        if (!secondary) {
 	            return primary;
 	        }
-	        var primaryIds = primary.map(function (x) { x.command.id; });
+	        var primaryIds = primary.map(function (x) { return x.command.id; });
 	        for (var i = 0; i < secondary.length; ++i) {
 	            var id = secondary[i].value.id;
 	            var pid = primaryIds.indexOf(id);
