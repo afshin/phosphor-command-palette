@@ -60,7 +60,6 @@ interface ICommandSectionHeading {
   title: string;
 };
 
-export
 interface ICommandSection {
   heading: ICommandSectionHeading;
   commands: ICommandItem[];

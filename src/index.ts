@@ -32,7 +32,7 @@ import {
 } from './status';
 
 import {
-  CommandPalette, ICommandSection, ICommandSectionHeading, ICommandSearchQuery
+  CommandPalette, ICommandSectionHeading, ICommandSearchQuery
 } from './commandpalette';
 
 import {
