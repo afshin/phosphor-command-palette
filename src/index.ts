@@ -158,7 +158,8 @@ function createHeader(): Widget {
 
 function createPalette(): Panel {
   let palette = new CommandPalette();
-  palette.commandSections = commandSections(commandItems);
+  palette.headings = headings;
+  palette.commandItems = commandItems;
   palette.execute.connect((sender, args) => {
     let command = args as ICommand;
     updateStatus('execute signal');
@@ -168,15 +169,15 @@ function createPalette(): Panel {
     let search = args as ICommandSearchQuery;
     updateStatus(`searching, id: ${search.id}, query: ${search.query}`);
     if (search.query === '') {
-      palette.commandSections = commandSections(commandItems);
+      palette.commandItems = commandItems;
       return;
     }
     function resolve(results: ICommandMatchResult[]):void {
-      let items = results.map(value => value.command);
-      palette.commandSections = commandSections(items);
+      let commandItems = results.map(value => value.command);
+      palette.commandItems = commandItems;
     }
     function reject(error: any): void {
-      palette.commandSections = [];
+      palette.commandItems = [];
     }
     matcher.search(search.query, commandItems).then(resolve, reject);
   });
@@ -199,25 +200,6 @@ function createPanel(header: Widget, list: Panel, dock: DockPanel, status: Widge
 
   panel.id = 'main';
   return panel;
-}
-
-function commandSections(items: ICommandItem[]): ICommandSection[] {
-  let sections: ICommandSection[] = [];
-  for (let i = 0; i < headings.length; ++i) {
-    let heading = headings[i];
-    let section: ICommandSection = { heading: heading, commands: [] };
-    for (let j = 0; j < items.length; ++j) {
-      let item = items[j];
-      let prefix = item.id.split(':').slice(0, 2).join(':');
-      if (prefix === heading.prefix) {
-        section.commands.push(item);
-      }
-    }
-    if (section.commands.length) {
-      sections.push(section);
-    }
-  }
-  return sections;
 }
 
 function main(): void {

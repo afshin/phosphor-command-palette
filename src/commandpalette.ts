@@ -79,14 +79,38 @@ class CommandPalette extends Panel {
     return executeSignal.bind(this);
   }
 
-  get commandSections(): ICommandSection[] {
-    return this._commandSections;
+  get commandItems(): ICommandItem[] {
+    return this._commandItems;
   }
 
-  set commandSections(commandSections: ICommandSection[]) {
-    this._commandSections = commandSections;
+  set commandItems(commandItems: ICommandItem[]) {
+    this._commandItems = commandItems;
     this._emptyList();
-    this._commandSections.forEach(section => { this._renderSection(section); });
+    this._createSections();
+    if (this._commandSections.length) {
+      this._commandSections.forEach(section => {
+        this._renderSection(section);
+      });
+    } else {
+      this._commandItems.forEach(item => { this._renderCommandItem(item); });
+    }
+  }
+
+  get headings(): ICommandSectionHeading[] {
+    return this._headings;
+  }
+
+  set headings(headings: ICommandSectionHeading[]) {
+    this._headings = headings;
+    this._emptyList();
+    this._createSections();
+    if (this._commandSections.length) {
+      this._commandSections.forEach(section => {
+        this._renderSection(section);
+      });
+    } else {
+      this._commandItems.forEach(item => { this._renderCommandItem(item); });
+    }
   }
 
   get search(): ISignal<CommandPalette, ICommandSearchQuery> {
@@ -121,7 +145,25 @@ class CommandPalette extends Panel {
     this.node.removeEventListener('keydown', this);
   }
 
-  private _getCommandById(id: string): ICommand {
+  private _createSections(): void {
+    this._commandSections = [];
+    for (let i = 0; i < this._headings.length; ++i) {
+      let heading = this._headings[i];
+      let section: ICommandSection = { heading: heading, commands: [] };
+      for (let j = 0; j < this._commandItems.length; ++j) {
+        let item = this._commandItems[j];
+        let prefix = item.id.split(':').slice(0, 2).join(':');
+        if (prefix === heading.prefix) {
+          section.commands.push(item);
+        }
+      }
+      if (section.commands.length) {
+        this._commandSections.push(section);
+      }
+    }
+  }
+
+  private _findCommandById(id: string): ICommand {
     for (let i = 0; i < this._commandSections.length; ++i) {
       let section = this._commandSections[i];
       for (let j = 0; j < section.commands.length; ++j) {
@@ -147,7 +189,7 @@ class CommandPalette extends Panel {
       }
       target = target.parentElement;
     }
-    this.execute.emit(this._getCommandById(target.getAttribute(COMMAND_ID)));
+    this.execute.emit(this._findCommandById(target.getAttribute(COMMAND_ID)));
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {
@@ -230,7 +272,9 @@ class CommandPalette extends Panel {
     section.commands.forEach(item => { this._renderCommandItem(item); });
   }
 
-  private _commandSections: ICommandSection[] = null;
+  private _commandItems: ICommandItem[] = [];
+  private _commandSections: ICommandSection[] = [];
+  private _headings: ICommandSectionHeading[] = [];
   private _list: HTMLDivElement = null;
   private _search: HTMLDivElement = null;
 }
