@@ -67,8 +67,7 @@ const registryItems: ICommandItem[] = [
 ]
 
 const nesSection: ICommandPaletteSection = {
-  id: 'demo:nes',
-  heading: 'The Ancient Near East',
+  text: 'The Ancient Near East',
   items: [
     {
       id: 'demo:nes:sumer',
@@ -116,11 +115,11 @@ const nesSection: ICommandPaletteSection = {
 };
 
 const fooSection: ICommandPaletteSection = {
-  id: 'demo:foo',
-  heading: 'Foo, bar, and friends',
+  text: 'Foo, bar, and friends',
   items: [
     {
       id: 'demo:foobar:foo',
+      args: ['a', 'b', 'c'],
       title: 'Foo',
       caption: 'Foo caption',
       shortcut: '⌘⎋'
@@ -171,9 +170,16 @@ function createHeader(): Widget {
 
 function createPalette(): Panel {
   let palette = new CommandPalette();
-  let remove = palette.add(nesSection);
-  palette.add(fooSection);
-  setTimeout(() => { remove.dispose(); }, 3000);
+  // Returns an IDisposable to allow for removal.
+  palette.add([nesSection, fooSection]);
+  // Duplicate section won't render.
+  palette.add([fooSection]);
+  palette.add([
+    {
+      text: 'Alphabet',
+      items: [{ id: 'demo:abc:a', title: 'A', caption: 'The letter A'}]
+    }
+  ]);
   // palette.execute.connect((sender, args) => {
   //   let command = args as ICommand;
   //   updateStatus('execute signal');

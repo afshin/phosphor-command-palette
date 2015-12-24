@@ -31,8 +31,12 @@ Panel
 } from 'phosphor-widget';
 
 import {
-  ICommandItem
+  CommandRegistry, ICommandItem
 } from './commands/registry';
+
+import {
+  FuzzyMatcher, ICommandMatchResult
+} from './commands/matcher';
 
 import './commandpalette.css';
 
@@ -54,6 +58,10 @@ const SEARCH_CLASS = 'p-search';
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
+
+const matcher = new FuzzyMatcher('title', 'caption');
+
+var commandID = 0;
 
 /**
  * An object which can be added to a command palette section.
@@ -86,27 +94,23 @@ interface ICommandPaletteItem {
   caption?: string;
 }
 
+
 /**
  * A group of items that can added to a command palette with headings.
  */
 export
 interface ICommandPaletteSection {
-  id: string;
-  heading: string;
+  /**
+   * The heading for the command section.
+   */
+  text: string;
+  /**
+   * The palette command items.
+   */
   items: ICommandPaletteItem[];
 };
 
-// export
-// interface ICommandSearchQuery {
-//   id: number;
-//   query: string;
-// }
 
-// export
-// interface ICommandSectionHeading {
-//   prefix: string;
-//   title: string;
-// };
 
 
 export
@@ -119,18 +123,38 @@ class CommandPalette extends Panel {
     this._renderList();
   }
 
-  add(section: ICommandPaletteSection): IDisposable {
-    let exists = !!~arrays.findIndex(this._sections, s => s.id === section.id);
-    if (exists) {
-      throw new Error(`${section.id} already exists in command palette`);
+  add(sections: ICommandPaletteSection[]): IDisposable {
+    let text: string;
+    let sectionIndex: number;
+    let itemIndex: number;
+    let registrationID: string;
+    let registrations: string[] = [];
+    let item: ICommandPaletteItem;
+    for (let section of sections) {
+      text = section.text;
+      sectionIndex = arrays.findIndex(this._sections, s => {
+        return s.text === text;
+      });
+      if (sectionIndex === -1) {
+        let ids = this._addSection(section);
+        Array.prototype.push.apply(registrations, ids);
+      } else {
+        let ids = this._amendSection(section.items, sectionIndex);
+        Array.prototype.push.apply(registrations, ids);
+      }
     }
-    let index = this._sections.push(section) - 1;
-    this._renderSection(section);
+    this._empty();
+    this._prune();
+    this._sort();
+    this._sections.forEach(section => this._renderSection(section));
     return new DisposableDelegate(() => {
-      arrays.removeAt(this._sections, index);
-      this._emptyList();
+      registrations.forEach(id => { this._removeItem(id); });
+      this._empty();
+      this._prune();
+      this._sort();
       this._sections.forEach(section => this._renderSection(section));
     });
+
   }
 
   handleEvent(event: Event): void {
@@ -154,24 +178,44 @@ class CommandPalette extends Panel {
     this.node.removeEventListener('keydown', this);
   }
 
-  private _emptyList(): void {
+  private _addSection(section: ICommandPaletteSection): string[] {
+    let registrations: string[] = [];
+    let registrationID: string;
+    this._sections.push(section);
+    for (let item of section.items) {
+      registrationID = `${++commandID}`;
+      this._registry[registrationID] = item;
+      registrations.push(registrationID);
+    }
+    return registrations;
+  }
+
+  private _amendSection(items: ICommandPaletteItem[], sectionIndex: number): string[] {
+    let registrations: string[] = [];
+    let registrationID: string;
+    let item: ICommandPaletteItem;
+    let itemIndex: number;
+    for (item of items) {
+      let existingItems = this._sections[sectionIndex].items;
+      itemIndex = arrays.findIndex(existingItems, i => {
+        return i === item;
+      });
+      if (itemIndex !== -1) {
+        continue;
+      }
+      registrationID = `${++commandID}`;
+      this._registry[registrationID] = item;
+      existingItems.push(item);
+      registrations.push(registrationID);
+    }
+    return registrations;
+  }
+
+  private _empty(): void {
     let list = this._list;
     while (list.firstChild) {
       list.removeChild(list.firstChild);
     }
-  }
-
-  private _findCommandItemById(id: string): ICommandPaletteItem {
-    for (let i = 0; i < this._sections.length; ++i) {
-      let section = this._sections[i];
-      for (let j = 0; j < section.items.length; ++j) {
-        let item = section.items[j];
-        if (item.id === id) {
-          return item;
-        }
-      }
-    }
-    return null;
   }
 
   private _evtClick(event: MouseEvent): void {
@@ -189,7 +233,7 @@ class CommandPalette extends Panel {
       target = target.parentElement;
     }
     let item = this._findCommandItemById(target.getAttribute(COMMAND_ID));
-    console.log(`run command ${item.id} with args:`, item.args);
+    console.log(`safeExecute command ${item.id} with args:`, item.args);
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {
@@ -218,6 +262,33 @@ class CommandPalette extends Panel {
     if (keyCode === DOWN_ARROW) {
       console.log('go down');
       return;
+    }
+  }
+
+  private _findCommandItemById(id: string): ICommandPaletteItem {
+    for (let i = 0; i < this._sections.length; ++i) {
+      let section = this._sections[i];
+      for (let j = 0; j < section.items.length; ++j) {
+        let item = section.items[j];
+        if (item.id === id) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  private _prune(): void {
+    this._sections = this._sections.filter(section => !!section.items.length);
+  }
+
+  private _removeItem(registrationID: string): void {
+    for (let section of this._sections) {
+      for (let item of section.items) {
+        if (item === this._registry[registrationID]) {
+          arrays.remove(section.items, item);
+        }
+      }
     }
   }
 
@@ -263,11 +334,21 @@ class CommandPalette extends Panel {
   }
 
   private _renderSection(section: ICommandPaletteSection): void {
-    this._renderHeading(section.heading);
+    this._renderHeading(section.text);
     section.items.forEach(item => { this._renderCommandItem(item); });
+  }
+
+  private _sort(): void {
+    this._sections.sort((a, b) => { return a.text.localeCompare(b.text); });
+    this._sections.forEach(section => section.items.sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    }));
   }
 
   private _sections: ICommandPaletteSection[] = [];
   private _list: HTMLDivElement = null;
   private _search: HTMLDivElement = null;
+  private _registry: {
+    [id: string]: ICommandPaletteItem;
+  } = Object.create(null);
 }
