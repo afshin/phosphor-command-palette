@@ -286,6 +286,7 @@ class CommandPalette extends Panel {
     for (let section of this._sections) {
       for (let item of section.items) {
         if (item === this._registry[registrationID]) {
+          delete this._registry[registrationID];
           arrays.remove(section.items, item);
         }
       }
